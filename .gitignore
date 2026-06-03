@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints/
+
+# Optional virtual environments
+.venv/
+venv/
+
+# OS artifacts
+Thumbs.db
+.DS_Store
+
+# Unrelated local folders in the workspace root
+AnalizaSprzedazy/
+Kurs_R_Gotowy/
+Planaroo-main/
+tomaweb.pl/
