@@ -44,6 +44,10 @@ This project explores how revenue, product mix, region, and sales channel change
   </tr>
 </table>
 
+### Project description PDF
+
+[Pobierz polski opis projektu zaliczeniowego](output/pdf/opis_projektu_analizy_danych.pdf)
+
 ## What the report covers
 
 The [Quarto report source](reports/sales_report.qmd) calculates its metrics and renders its charts from the source CSV whenever it runs.
@@ -112,6 +116,7 @@ The Quarto report reads the CSV directly. The SQLite database and SQL queries ar
 data/                 Synthetic source CSV and SQLite database
 dashboard/            Quarto report guide
 outputs/              CSV summaries, dashboard image, and chart snapshots
+output/pdf/           Polish project description PDF
 reports/              Quarto report source (.qmd)
 scripts/              Data generation, SQLite loading, and Python analysis
 sql/                  Database schema and example analytical queries
