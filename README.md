@@ -1,234 +1,138 @@
-# Sales Analytics End-to-End Portfolio Project
+<div align="center">
 
-This project simulates a realistic retail sales environment across two full years and demonstrates a complete analytics workflow:
+# 📊 Retail Sales Analytics
 
-- Synthetic data generation in Python
-- CSV ingestion into SQLite
-- Exploratory and business analysis in Python with `pandas`
-- Visualization output for reporting
-- Power BI dashboard design for stakeholder consumption
+### From synthetic transaction data to an interactive, reproducible Quarto report
 
-## Portfolio snapshot
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
+![Quarto](https://img.shields.io/badge/Quarto-Reports-75AADB?logo=quarto&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-Data%20Model-003B57?logo=sqlite&logoColor=white)
+![Project](https://img.shields.io/badge/Project-Academic%20%7C%20Portfolio-7C3AED)
 
-This project answers a practical retail analytics question:
+[Overview](#project-overview) · [Analysis](#what-the-report-covers) · [Run it](#run-the-quarto-report) · [Structure](#project-structure)
 
-"How are revenue, product mix, region performance, and channel performance changing over time, and where should the business focus next?"
+</div>
 
-### Core KPIs tracked
+---
 
-- Total Revenue
-- Total Orders
-- Average Order Value
-- Unique Customers
-- Units Sold
+## Project overview
 
-### Business questions answered
+This project explores how revenue, product mix, region, and sales channel change over time in a simulated retail business. It demonstrates a repeatable analytics workflow with **Python, pandas, SQLite, and Quarto**.
 
-- Which product categories generate the most revenue?
-- Which region underperforms and may need targeted action?
-- How strong is seasonality across the two-year period?
-- Does `Online` outperform `Store`, and by how much?
-- Which products drive the largest share of revenue?
-- Is order volume concentrated in low-ticket or high-ticket categories?
+> **Data note:** The included 30,000-row dataset is synthetic. Results illustrate the analysis workflow and are not claims about a real retailer.
 
-## Screenshots
+### At a glance
 
-Main dashboard:
+| Dataset | Period | Records | Deliverables |
+|:--|:--|--:|:--|
+| Simulated retail transactions | 2024–2025 | 30,000 | Quarto HTML report, SQLite database, CSV summaries, charts |
 
-![Sales dashboard](/C:/Users/tomas/Documents/New%20project/outputs/sales_analysis_dashboard.png)
+### Dashboard preview
 
-KPI overview:
+![Sales analysis dashboard](outputs/sales_analysis_dashboard.png)
 
-![KPI overview](/C:/Users/tomas/Documents/New%20project/outputs/screenshots/01_kpi_overview.png)
+### Quarto application screenshots
 
-Monthly revenue trend:
+<table>
+  <tr>
+    <td align="center"><img src="outputs/screenshots/00_quarto_report_overview.jpg" alt="Quarto report executive summary and KPI table" width="100%"><br><sub>Executive summary and KPIs</sub></td>
+    <td align="center"><img src="outputs/screenshots/07_quarto_product_category.jpg" alt="Quarto report category revenue and product ranking" width="100%"><br><sub>Category performance and top products</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="outputs/screenshots/08_quarto_region.jpg" alt="Quarto report revenue by region" width="100%"><br><sub>Regional comparison</sub></td>
+    <td align="center"><img src="outputs/screenshots/09_quarto_channels.jpg" alt="Quarto report sales channel comparison" width="100%"><br><sub>Online and store performance</sub></td>
+  </tr>
+</table>
 
-![Monthly revenue trend](/C:/Users/tomas/Documents/New%20project/outputs/screenshots/02_monthly_revenue_trend.png)
+## What the report covers
 
-Revenue by category:
+The [Quarto report source](reports/sales_report.qmd) calculates its metrics and renders its charts from the source CSV whenever it runs.
 
-![Revenue by category](/C:/Users/tomas/Documents/New%20project/outputs/screenshots/03_revenue_by_category.png)
+- **Business performance:** revenue, orders, average order value, customers, and units sold
+- **Trends:** monthly revenue and annual comparison
+- **Sales mix:** product and category performance
+- **Segments:** region and sales channel comparisons
+- **Evidence:** inspectable tables alongside charts
 
-Revenue by region:
+The analysis focuses on questions such as which categories and products contribute most to revenue, whether performance varies across regions and channels, and how monthly sales change across the two-year period.
 
-![Revenue by region](/C:/Users/tomas/Documents/New%20project/outputs/screenshots/04_revenue_by_region.png)
+## Run the Quarto report
 
-The dataset includes 30,000 sales records from `2024-01-01` to `2025-12-31` and was intentionally designed with:
+Install [Quarto](https://quarto.org/docs/get-started/) and Python 3.11. From the project root, create a virtual environment and install the dependencies:
 
-- Q4 seasonality spikes
-- Different price bands across categories
-- Uneven regional performance
-- Distinct online vs store channel behavior
-- Product popularity differences instead of pure random sampling
-
-## Project structure
-
-```text
-New project/
-|-- data/
-|   |-- sales_analytics.db
-|   `-- sales_data.csv
-|-- dashboard/
-|   `-- power_bi_dashboard_guide.md
-|-- notebooks/
-|   `-- README.md
-|-- outputs/
-|   |-- analysis_summary.csv
-|   |-- kpis.csv
-|   |-- monthly_revenue.csv
-|   |-- revenue_by_category.csv
-|   |-- revenue_by_region.csv
-|   |-- sales_analysis_dashboard.png
-|   |-- sales_channel_comparison.csv
-|   |-- screenshots/
-|   `-- top_10_products.csv
-|-- scripts/
-|   |-- analyze_sales.py
-|   |-- generate_sales_data.py
-|   `-- load_to_sqlite.py
-|-- sql/
-|   |-- 01_create_schema.sql
-|   |-- 02_import_sales_data.sql
-|   `-- 03_analytics_queries.sql
-|-- requirements.txt
-`-- README.md
+```powershell
+py -3.11 -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 ```
 
-## 1. Synthetic data generation
+The Quarto Jupyter engine needs the Jupyter packages in the **same Python environment** that renders the report. They are included in `requirements.txt`. If you are installing them separately into your global Python 3.11 instead, use:
 
-The generator script creates realistic transactional sales data with the following fields:
+```powershell
+py -3.11 -m pip install jupyter jupyter_client nbformat nbclient ipykernel traitlets
+```
 
-- `order_id`
-- `order_date`
-- `customer_id`
-- `product_id`
-- `product_name`
-- `category`
-- `quantity`
-- `unit_price`
-- `total_price`
-- `region`
-- `sales_channel`
+Render the report to HTML:
 
-### Logic used to make the data realistic
+```powershell
+quarto render reports/sales_report.qmd
+```
 
-- Sales volume is weighted by day rather than uniformly random
-- Q4 receives the strongest uplift, with November and December peaking
-- Category mix is controlled with weighted product popularity
-- Unit prices differ materially across categories
-- Online/store mix depends on region
-- Quantity distributions differ by category and channel
-- Prices vary slightly over time to simulate promotions and seasonal pricing
+The output is `reports/sales_report.html`. To preview the report and rerender after edits:
 
-### Run the generator
+```powershell
+quarto preview reports/sales_report.qmd
+```
+
+## Other workflows
+
+Generate a fresh synthetic dataset:
 
 ```powershell
 python scripts/generate_sales_data.py
 ```
 
-Output:
-
-- [sales_data.csv](C:/Users/tomas/Documents/New%20project/data/sales_data.csv)
-
-## 2. SQLite schema and import
-
-The SQLite model is intentionally normalized into:
-
-- `customers`
-- `products`
-- `sales`
-
-### Files
-
-- [01_create_schema.sql](C:/Users/tomas/Documents/New%20project/sql/01_create_schema.sql)
-- [02_import_sales_data.sql](C:/Users/tomas/Documents/New%20project/sql/02_import_sales_data.sql)
-- [03_analytics_queries.sql](C:/Users/tomas/Documents/New%20project/sql/03_analytics_queries.sql)
-- [load_to_sqlite.py](C:/Users/tomas/Documents/New%20project/scripts/load_to_sqlite.py)
-
-### Import workflow
-
-1. Generate `sales_data.csv`
-2. Run `scripts/load_to_sqlite.py`
-3. This creates [sales_analytics.db](C:/Users/tomas/Documents/New%20project/data/sales_analytics.db)
-4. Use `03_analytics_queries.sql` for validation in any SQLite client
-
-### Create the SQLite database
+Load the CSV into the normalized SQLite database:
 
 ```powershell
 python scripts/load_to_sqlite.py
 ```
 
-## 3. Python analysis
-
-The analysis script reads the sales data, calculates portfolio-ready KPIs, exports summary tables, and generates a dashboard image.
-
-### Analyses included
-
-- Monthly revenue trends
-- Top 10 products by revenue
-- Revenue by category
-- Revenue by region
-- Sales channel comparison
-- Average order value
-
-### Run the analysis
+Generate the existing CSV summaries and PNG dashboard:
 
 ```powershell
-python scripts/analyze_sales.py --show
+python scripts/analyze_sales.py
 ```
 
-Outputs:
+The Quarto report reads the CSV directly. The SQLite database and SQL queries are available for database-focused analysis.
 
-- [kpis.csv](C:/Users/tomas/Documents/New%20project/outputs/kpis.csv)
-- [monthly_revenue.csv](C:/Users/tomas/Documents/New%20project/outputs/monthly_revenue.csv)
-- [revenue_by_category.csv](C:/Users/tomas/Documents/New%20project/outputs/revenue_by_category.csv)
-- [revenue_by_region.csv](C:/Users/tomas/Documents/New%20project/outputs/revenue_by_region.csv)
-- [sales_channel_comparison.csv](C:/Users/tomas/Documents/New%20project/outputs/sales_channel_comparison.csv)
-- [top_10_products.csv](C:/Users/tomas/Documents/New%20project/outputs/top_10_products.csv)
-- [sales_analysis_dashboard.png](C:/Users/tomas/Documents/New%20project/outputs/sales_analysis_dashboard.png)
-- [screenshots](C:/Users/tomas/Documents/New%20project/outputs/screenshots)
+## Project structure
 
-## 4. Power BI dashboard design
+```text
+data/                 Synthetic source CSV and SQLite database
+dashboard/            Quarto report guide
+outputs/              CSV summaries, dashboard image, and chart snapshots
+reports/              Quarto report source (.qmd)
+scripts/              Data generation, SQLite loading, and Python analysis
+sql/                  Database schema and example analytical queries
+requirements.txt      Python and Jupyter dependencies
+```
 
-Use the guide in [power_bi_dashboard_guide.md](C:/Users/tomas/Documents/New%20project/dashboard/power_bi_dashboard_guide.md) to build a one-page dashboard with:
+## Data and metric definitions
 
-- KPI cards: Total Revenue, Total Orders, Average Order Value
-- Monthly revenue trend line
-- Revenue by category bar chart
-- Revenue by region bar chart
-- Sales channel comparison visual
-- Top products table
-- Filters for date, region, category, and sales channel
+- The data contains 30,000 rows dated from 2024-01-01 through 2025-12-31.
+- Each `order_id` is unique in the included data, so each row represents one order.
+- **Revenue** is the sum of `total_price`.
+- **Orders** is the count of distinct `order_id` values.
+- **Average order value** is revenue divided by distinct orders.
+- Customer and product attributes are stored in separate SQLite dimension tables.
 
-## 5. Key business insights from the generated dataset
+If the dataset is replaced with real data or multiple line items per order, review the data definitions and aggregation logic before interpreting the report.
 
-Based on the current generated outputs:
+## Academic use
 
-1. Electronics is the dominant revenue driver with `$5.85M`, contributing roughly 54% of total revenue.
-2. North is the strongest region at `$3.41M`, while East is the weakest at `$2.32M`, showing a meaningful geographic performance gap.
-3. Online generates more revenue overall (`$6.09M`) than Store (`$4.76M`), but Store has a slightly higher average order value.
-4. Q4 is the clearest seasonal peak, with the strongest months concentrated in November and December and `2025-12` reaching `$814.0K`.
-5. Premium electronics drive outsized value. `Gaming Laptop` and `4K Smart TV` are the top two products by revenue by a wide margin.
-6. Clothing produces the highest order count, but not the highest revenue, which suggests it is volume-led while Electronics is price-led.
+This project can work well as a course project when the assignment covers exploratory or descriptive data analysis, visualization, KPI definition, or a reproducible reporting workflow. For a stronger submission, include the instructor's required question or hypothesis, explain data preparation and metric choices, and interpret the results in your own words. Since the bundled dataset is synthetic, use a real, citable dataset if the course requires empirical data or conclusions about an actual business.
 
-## 6. Portfolio positioning
+## Extend the analysis
 
-This project is suitable for showcasing:
-
-- Data engineering fundamentals through CSV-to-SQLite ingestion
-- Analytical thinking through trend and segmentation analysis
-- Business intelligence design through Power BI planning
-- Python automation for repeatable analytics workflows
-
-### Recommended CV / GitHub framing
-
-You can describe this project as:
-
-"Built an end-to-end sales analytics project using Python, SQLite, and Power BI-ready outputs. Generated two years of synthetic transactional sales data, modeled the data into a relational schema, automated KPI reporting, and produced visual analysis assets for portfolio presentation."
-
-## 7. Notes for production polish
-
-- Parameterize file paths with environment variables
-- Add database load automation with `sqlalchemy`
-- Add unit tests for data quality checks
-- Extend the model with customer demographics and returns data
+Edit `reports/sales_report.qmd` to add Python calculations, visualizations, and narrative. Each render re-executes the analysis using the current CSV. See the [Quarto report guide](dashboard/quarto_report_guide.md) for setup details.

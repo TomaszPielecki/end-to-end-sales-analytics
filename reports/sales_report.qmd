@@ -1,0 +1,184 @@
+---
+title: "Sales Performance Report"
+subtitle: "Revenue, product mix, regions, and sales channels"
+author: "Sales Analytics Project"
+date: today
+lang: en
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    embed-resources: true
+jupyter: python3
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{python}
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import pandas as pd
+from IPython.display import Markdown, display
+
+plt.style.use("seaborn-v0_8-whitegrid")
+plt.rcParams.update({"figure.figsize": (10, 5), "axes.titleweight": "bold"})
+
+data_path = Path("data/sales_data.csv")
+if not data_path.exists():
+    data_path = Path("../data/sales_data.csv")
+if not data_path.exists():
+    raise FileNotFoundError(
+        "Could not find data/sales_data.csv. Render from the repository root "
+        "or keep this report in the reports/ folder."
+    )
+
+sales = pd.read_csv(data_path, parse_dates=["order_date"])
+required_columns = {
+    "order_id", "order_date", "customer_id", "product_name", "category",
+    "quantity", "total_price", "region", "sales_channel",
+}
+missing_columns = required_columns.difference(sales.columns)
+if missing_columns:
+    raise ValueError(f"The sales CSV is missing columns: {', '.join(sorted(missing_columns))}")
+
+sales["year_month"] = sales["order_date"].dt.to_period("M").astype(str)
+sales["year"] = sales["order_date"].dt.year
+total_revenue = sales["total_price"].sum()
+total_orders = sales["order_id"].nunique()
+average_order_value = total_revenue / total_orders if total_orders else 0
+unique_customers = sales["customer_id"].nunique()
+units_sold = sales["quantity"].sum()
+
+monthly = sales.groupby(["year", "year_month"], as_index=False).agg(
+    revenue=("total_price", "sum"), orders=("order_id", "nunique")
+)
+category = sales.groupby("category", as_index=False).agg(
+    revenue=("total_price", "sum"), orders=("order_id", "nunique"), units=("quantity", "sum")
+).sort_values("revenue", ascending=False)
+region = sales.groupby("region", as_index=False).agg(
+    revenue=("total_price", "sum"), orders=("order_id", "nunique")
+).sort_values("revenue", ascending=False)
+channel = sales.groupby("sales_channel", as_index=False).agg(
+    revenue=("total_price", "sum"), orders=("order_id", "nunique"), units=("quantity", "sum")
+)
+channel["average_order_value"] = channel["revenue"] / channel["orders"]
+products = sales.groupby(["product_name", "category"], as_index=False).agg(
+    revenue=("total_price", "sum"), units=("quantity", "sum"), orders=("order_id", "nunique")
+).sort_values("revenue", ascending=False).head(10)
+yearly = sales.groupby("year", as_index=False).agg(
+    revenue=("total_price", "sum"), orders=("order_id", "nunique")
+)
+yearly["average_order_value"] = yearly["revenue"] / yearly["orders"]
+```
+
+## Executive summary
+
+```{python}
+display(Markdown(
+    f"The dataset covers **{sales['order_date'].min():%Y-%m-%d} to "
+    f"{sales['order_date'].max():%Y-%m-%d}** and contains **{len(sales):,}** "
+    f"sales rows. Total revenue is **${total_revenue:,.0f}** across "
+    f"**{total_orders:,}** orders, with an average order value of "
+    f"**${average_order_value:,.2f}**.\n\n"
+    f"The leading category is **{category.iloc[0]['category']}** "
+    f"(${category.iloc[0]['revenue']:,.0f}). The highest-revenue region is "
+    f"**{region.iloc[0]['region']}**, and **{channel.sort_values('revenue', ascending=False).iloc[0]['sales_channel']}** "
+    "is the larger sales channel by revenue."
+))
+```
+
+## Key performance indicators
+
+```{python}
+kpis = pd.DataFrame({
+    "Metric": ["Total revenue", "Orders", "Average order value", "Unique customers", "Units sold"],
+    "Value": [
+        f"${total_revenue:,.2f}", f"{total_orders:,}", f"${average_order_value:,.2f}",
+        f"{unique_customers:,}", f"{units_sold:,}",
+    ],
+})
+display(kpis.style.hide(axis="index"))
+```
+
+## Revenue over time
+
+Monthly revenue shows how sales change across the available period. Compare the same months across years to distinguish year-to-year changes from seasonality.
+
+```{python}
+fig, ax = plt.subplots(figsize=(12, 5))
+for year, group in monthly.groupby("year"):
+    ax.plot(group["year_month"], group["revenue"], marker="o", linewidth=2, label=str(year))
+ax.set(title="Monthly revenue", xlabel="Month", ylabel="Revenue ($)")
+ax.tick_params(axis="x", rotation=60)
+ax.legend(title="Year")
+fig.tight_layout()
+plt.show()
+```
+
+### Annual comparison
+
+```{python}
+display(yearly.style.format({
+    "revenue": "${:,.2f}", "orders": "{:,.0f}", "average_order_value": "${:,.2f}"
+}).hide(axis="index"))
+```
+
+## Product and category performance
+
+```{python}
+fig, ax = plt.subplots(figsize=(9, 5))
+plot_category = category.sort_values("revenue")
+ax.barh(plot_category["category"], plot_category["revenue"], color="#2563eb")
+ax.set(title="Revenue by category", xlabel="Revenue ($)", ylabel="")
+fig.tight_layout()
+plt.show()
+```
+
+The table lists the ten highest-revenue products. Revenue describes value sold; units provide a complementary view of volume.
+
+```{python}
+display(products.style.format({"revenue": "${:,.2f}", "units": "{:,.0f}", "orders": "{:,.0f}"}).hide(axis="index"))
+```
+
+## Regional performance
+
+```{python}
+fig, ax = plt.subplots(figsize=(9, 4))
+plot_region = region.sort_values("revenue")
+ax.barh(plot_region["region"], plot_region["revenue"], color="#0f766e")
+ax.set(title="Revenue by region", xlabel="Revenue ($)", ylabel="")
+fig.tight_layout()
+plt.show()
+```
+
+```{python}
+display(region.style.format({"revenue": "${:,.2f}", "orders": "{:,.0f}"}).hide(axis="index"))
+```
+
+## Sales channel comparison
+
+```{python}
+fig, ax = plt.subplots(figsize=(7, 4))
+ax.bar(channel["sales_channel"], channel["revenue"], color=["#f59e0b", "#7c3aed"][:len(channel)])
+ax.set(title="Revenue by sales channel", xlabel="Channel", ylabel="Revenue ($)")
+fig.tight_layout()
+plt.show()
+```
+
+```{python}
+display(channel[["sales_channel", "revenue", "orders", "average_order_value", "units"]].style.format({
+    "revenue": "${:,.2f}", "orders": "{:,.0f}",
+    "average_order_value": "${:,.2f}", "units": "{:,.0f}",
+}).hide(axis="index"))
+```
+
+## Notes on interpretation
+
+- The included data is synthetic and represents a simulated retail business.
+- Every `order_id` is unique in this dataset; each row therefore represents one order. If the data changes to multiple line items per order, calculate order value by first summing line revenue per order.
+- Revenue is the sum of `total_price`; average order value is revenue divided by distinct orders.
+- This report reads `data/sales_data.csv` directly and does not require the SQLite database.

@@ -185,7 +185,7 @@ def create_visualizations(
                 plt.show()
             plt.close(fig)
             return
-        except Exception:
+        except Exception:  # noqa: BLE001
             # Fall back when local matplotlib/seaborn/pandas versions are incompatible.
             pass
 
